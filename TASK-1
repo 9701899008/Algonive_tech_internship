@@ -1,46 +1,30 @@
-# STEP 1: Upload CSV file
 from google.colab import files
 uploaded = files.upload()
-# STEP 2: Import Libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-
-# STEP 3: Load Dataset
 df = pd.read_csv("Mall_Customers.csv")
 print(" Dataset Loaded. First 5 rows:")
 print(df.head())
-
-# STEP 4: Preprocessing
 df.drop("CustomerID", axis=1, inplace=True)  # Remove ID
 df["Gender"] = LabelEncoder().fit_transform(df["Gender"])  # Encode Gender (Male=1, Female=0)
-
-# STEP 5: Exploratory Data Analysis (EDA)
-# Pairplot
 sns.pairplot(df)
 plt.suptitle(" Pairplot of Customer Features", y=1.02)
 plt.show()
-
-# Heatmap
 plt.figure(figsize=(8,6))
 sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
 plt.title("Correlation Heatmap")
 plt.show()
-
-# STEP 6: Feature Scaling
 scaler = StandardScaler()
 scaled_df = scaler.fit_transform(df)
-
-# STEP 7: Elbow Method to find optimal K
 wcss = []
 for i in range(1, 11):
     kmeans = KMeans(n_clusters=i, random_state=42, n_init=10)
     kmeans.fit(scaled_df)
     wcss.append(kmeans.inertia_)
-
 plt.figure(figsize=(7,4))
 plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
 plt.title("Elbow Method for Optimal Clusters")
@@ -48,15 +32,10 @@ plt.xlabel("Number of Clusters")
 plt.ylabel("WCSS")
 plt.grid(True)
 plt.show()
-
-# STEP 8: Apply KMeans Clustering (Assume K=5)
 kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
 df['Cluster'] = kmeans.fit_predict(scaled_df)
-
-# STEP 9: PCA for 2D Visualization
 pca = PCA(n_components=2)
 pca_components = pca.fit_transform(scaled_df)
-
 plt.figure(figsize=(8,6))
 plt.scatter(pca_components[:, 0], pca_components[:, 1], c=df['Cluster'], cmap='rainbow', s=60)
 plt.title("Customer Segments Visualization (PCA)")
@@ -65,8 +44,6 @@ plt.ylabel("PCA Component 2")
 plt.colorbar(label="Cluster")
 plt.grid(True)
 plt.show()
-
-# STEP 10: Cluster Summary
 print("\n Cluster Profiles (Mean Values):")
 print(df.groupby("Cluster").mean())
 
